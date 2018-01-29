@@ -174,9 +174,12 @@ render() {
 		<br/>
 		 <div className="row">
 		 <div className="col-sm-2"></div>
-			<div className = "col-4"><p><h2><b> Total Score: {this.state.score}</b></h2></p>
-			</div>
-			<div className = "col-6">
+		<div className = "col-3"><p><h2><b> Total Score: {this.state.score}</b></h2></p>
+		</div>
+		 <div className = "col-3"><p><h2><b> Your Clicks: {this.state.clicks}</b></h2></p>
+                        </div>
+
+			<div className = "col-4">
 			<Button type="button" className="btn btn-lg" onClick = {() => this.setState(initialState())}> Reset </Button>
 			</div>
 			</div>
