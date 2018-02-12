@@ -9,7 +9,10 @@
 
     <title>Hello Memory!</title>
     <link rel="stylesheet" href="<%= static_path(@conn, "/css/app.css") %>">
-  </head>
+     <script>
+      window.userToken = "TODO";
+    </script>
+ </head>
 
   <body>
     <div class="container">

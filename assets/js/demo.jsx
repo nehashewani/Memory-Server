@@ -2,16 +2,16 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Button } from 'reactstrap';
 
-export default function run_demo(root) {
-  ReactDOM.render(<Demo side={0}/>, root);
+export default function run_demo(root,channel) {
+  ReactDOM.render(<Demo channel={channel}/>, root);
 }
 
-function shuffle(arr) { var j, x, i; for (i = arr.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); x = arr[i]; arr[i] = arr[j]; arr[j] = x; } }
+/*function shuffle(arr) { var j, x, i; for (i = arr.length - 1; i > 0; i--) { j = Math.floor(Math.random() * (i + 1)); x = arr[i]; arr[i] = arr[j]; arr[j] = x; } }
 
 function initialState() {
 	let arr = ["A","B","C","D","E","F","G","H","A","B","C","D","E","F","G","H"];
         shuffle(arr);
-	
+
 	let tiles1 = [];
         for(var i = 0; i < 16; i++)
                 tiles1.push({idx: i, text: "Try Me!", clicked: false, disabled: false, bgcolor: "btn btn-dark"});
@@ -26,15 +26,60 @@ function initialState() {
         };
 
 
-}
+}*/
 class Demo extends React.Component {
   constructor(props) {
     super(props);
-	this.state = initialState();	
+    this.channel = props.channel;
+	  this.state = {
+             active_tile:[],
+             char_array:[],
+             clicks: 0,
+             tiles: [],
+             processing: false,
+             score: 0,
+             matched: false
+     }
+    this.channel.join()
+                .receive("ok", this.gotState.bind(this))
+                .receive("error", resp => {console.log("Unable to join", resp)});
+ }
+
+ gotState(view){
+   console.log("NEw State ", view)
+   if(view.matched != undefined && !view.matched)
+   {
+     setTimeout(() => {
+       this.setState(view.game, function(){
+         if(this.state.active_tile.length == 2 ){
+           setTimeout(() => {
+           this.channel.push("checktile",{})
+                       .receive("ok", this.gotState.bind(this));
+           // this.channel.push("checktile",{})
+           //             .receive("ok", msg => {this.gotState.bind(this)});
+            }, 1000);
+          }
+          this.youWin();
+       });
+     }, 1000);
+   }
+   else{
+     this.setState(view.game, function(){
+       if(this.state.active_tile.length == 2 ){
+         //setTimeout(() => {
+         this.channel.push("checktile",{})
+                     .receive("ok", this.gotState.bind(this));
+         // this.channel.push("checktile",{})
+         //             .receive("ok", msg => {this.gotState.bind(this)});
+          //}, 1000);
+        }
+        this.youWin();
+     });
+  }
  }
 
 youWin() {
-	
+
        for(var i = 0; i < 16; i++)
                 if(!this.state.tiles[i].disabled) {break;}
         if(i == 16)
@@ -42,9 +87,19 @@ youWin() {
 }
 
 
-	
- displayLetter(idx) {
-	var letter = this.state.char_array[idx];
+
+ displayLetter(ix) {
+   if (this.state.active_tile.length < 2 && !this.state.tiles[ix].clicked){
+     this.channel.push("validate",{idx: ix})
+                  .receive("ok", this.gotState.bind(this));
+  }
+   else{
+     console.log("calling open tile")
+     this.channel.push("checktile",{idx: ix})
+                 .receive("ok", this.gotState.bind(this));
+   }
+	/*
+  var letter = this.state.char_array[idx];
 	let tileStates = this.state.tiles;
 	let tileState = tileStates[idx];
 	let actives = this.state.active_tile;
@@ -99,104 +154,148 @@ youWin() {
 		}
 	}
 
-	this.youWin();
+	this.youWin();*/
 } //displayLetter ends
 
 
 render() {
 	var displayLetter = this.displayLetter.bind(this);
-	 return (
-	<div className = "container">
-         	<div className="row">
-		<div className="col-sm-2"></div>
-		<div className="col-2">
-                        <Tile idx = {0} root = {this} />
-		</div>
-		<div className="col-2">
-                        <Tile idx = {1} root = {this} />
-		</div>
-		<div className="col-2">
-                        <Tile idx = {2} root = {this} />
-		</div>
-		<div className="col-2">
-                        <Tile idx = {3} root = {this} />
-		</div>
-		</div>
-		<br/>
-		<div className="row">
-                <div className="col-sm-2"></div>
-		<div className="col-2">
-                        <Tile idx = {4} root = {this} />
-		</div>
-		<div className="col-2">
-                        <Tile idx = {5} root = {this} />
-                </div>
-                <div className="col-2">
-                        <Tile idx = {6} root = {this} />
-                </div>
-                <div className="col-2">
-                        <Tile idx = {7} root = {this} />
-                </div>
-		</div>
-		<br/>
-		<div className="row">
-		 <div className="col-sm-2"></div>
-                <div className="col-2">
-                        <Tile idx = {8} root = {this} />
-                </div>
-                <div className="col-2">
-                        <Tile idx = {9} root = {this} />
-                </div>
-		<div className="col-2">
-                        <Tile idx = {10} root = {this} />
-                </div> 
-                <div className="col-2">
-                        <Tile idx = {11} root = {this} />
-                </div>
-		</div>
-		<br/>
-		<div className="row">
-		 <div className="col-sm-2"></div>
-		<div className="col-2">
-                        <Tile idx = {12} root = {this} />
-                </div> 
-                <div className="col-2">
-                        <Tile idx = {13} root = {this} />
-                </div>
-		<div className="col-2">
-                	<Tile idx={14} root={this} />
-		</div> 
-                <div className="col-2">
-                
-                        <Tile idx = {15} root = {this} />
-		</div>
-		</div>
-		<br/>
-		 <div className="row">
-		 <div className="col-sm-2"></div>
-		<div className = "col-3"><p><h2><b> Total Score: {this.state.score}</b></h2></p>
-		</div>
-		 <div className = "col-3"><p><h2><b> Your Clicks: {this.state.clicks}</b></h2></p>
-                        </div>
+  var rows = [];
+  {[...Array(16)].map((x, i) =>
+    // if(i %4 ==0){
+    //   rows.push(<div class="row">)
+    //   rows.push(<div className="col-sm-2"></div>)
+    // }
+     rows.push(<div class="col-3"><Tile idx = {i} root = {this} /></div>)
+     // if(i %4 ==0){
+     //   rows.push(</div><br/>)
+     // }
+   )}
+   return (<div class="container">
+    <div class="row">
+    {rows}
+    </div>
+    <br/>
+    <div className="row">
+  		 <div className="col-sm-2"></div>
+  		<div className = "col-3"><p><h2><b> Total Score: {this.state.score}</b></h2></p>
+  		</div>
+  		 <div className = "col-3"><p><h2><b> Your Clicks: {this.state.clicks}</b></h2></p>
+                          </div>
 
-			<div className = "col-4">
-			<Button type="button" className="btn btn-lg" onClick = {() => this.setState(initialState())}> Reset </Button>
-			</div>
-			</div>
-                </div>
-		);
+  			<div className = "col-4">
+  			<Button type="button" className="btn btn-lg" onClick = {() => {
+          this.channel.push("reset",{})
+                      .receive("ok", this.gotState.bind(this))
+                      .receive("error", resp => {console.log("Unable to reset", resp)});
+        }
+        }> Reset </Button>
+  			</div>
+  			</div>
+   </div>);
+	//  return (
+	// <div className = "container">
+  //        	<div className="row">
+	// 	<div className="col-sm-2"></div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {0} root = {this} />
+	// 	</div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {1} root = {this} />
+	// 	</div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {2} root = {this} />
+	// 	</div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {3} root = {this} />
+	// 	</div>
+	// 	</div>
+	// 	<br/>
+	// 	<div className="row">
+  //               <div className="col-sm-2"></div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {4} root = {this} />
+	// 	</div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {5} root = {this} />
+  //               </div>
+  //               <div className="col-2">
+  //                       <Tile idx = {6} root = {this} />
+  //               </div>
+  //               <div className="col-2">
+  //                       <Tile idx = {7} root = {this} />
+  //               </div>
+	// 	</div>
+	// 	<br/>
+	// 	<div className="row">
+	// 	 <div className="col-sm-2"></div>
+  //               <div className="col-2">
+  //                       <Tile idx = {8} root = {this} />
+  //               </div>
+  //               <div className="col-2">
+  //                       <Tile idx = {9} root = {this} />
+  //               </div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {10} root = {this} />
+  //               </div>
+  //               <div className="col-2">
+  //                       <Tile idx = {11} root = {this} />
+  //               </div>
+	// 	</div>
+	// 	<br/>
+	// 	<div className="row">
+	// 	 <div className="col-sm-2"></div>
+	// 	<div className="col-2">
+  //                       <Tile idx = {12} root = {this} />
+  //               </div>
+  //               <div className="col-2">
+  //                       <Tile idx = {13} root = {this} />
+  //               </div>
+	// 	<div className="col-2">
+  //               	<Tile idx={14} root={this} />
+	// 	</div>
+  //               <div className="col-2">
+  //
+  //                       <Tile idx = {15} root = {this} />
+	// 	</div>
+	// 	</div>
+	// 	<br/>
+	// 	 <div className="row">
+	// 	 <div className="col-sm-2"></div>
+	// 	<div className = "col-3"><p><h2><b> Total Score: {this.state.score}</b></h2></p>
+	// 	</div>
+	// 	 <div className = "col-3"><p><h2><b> Your Clicks: {this.state.clicks}</b></h2></p>
+  //                       </div>
+  //
+	// 		<div className = "col-4">
+	// 		<Button type="button" className="btn btn-lg" onClick = {() => {
+  //       this.channel.push("reset",{})
+  //                   .receive("ok", this.gotState.bind(this))
+  //                   .receive("error", resp => {console.log("Unable to reset", resp)});
+  //     }
+  //     }> Reset </Button>
+	// 		</div>
+	// 		</div>
+  //               </div>
+	// 	);
 		}
 		}
-               					
-						
+
+
 
 
 function Tile(params) {
 	let root = params.root;
+  let styleProps = {
+    marginTop: '20px',
+  };
+  if(root.state.tiles.length>0)
 	return (
-		<Button type="button" className = {root.state.tiles[params.idx].bgcolor}  onClick = { () => root.displayLetter(params.idx) }>{root.state.tiles[params.idx].text}</Button>
+		<Button type="button" className = {root.state.tiles[params.idx].bgcolor}  onClick = { () => root.displayLetter(params.idx) } style={styleProps} >{root.state.tiles[params.idx].text}</Button>
 
 
 	);
+  else {
+    return (<p> Loading</p>);
+  }
 }
-

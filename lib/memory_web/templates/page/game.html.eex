@@ -1,0 +1,11 @@
+<div class="row">
+	<div class="col">
+		<h1>Memory Game - <%= @game %></h1>
+	<div id="game">
+		<p> Loading...</p>
+	</div>
+	</div>
+	<script>
+		window.gameName	= "<%= @game %>";
+	</script>
+</div>

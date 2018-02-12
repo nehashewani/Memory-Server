@@ -1,8 +1,16 @@
 <h1>Memory Game</h1>
-
-<div id="game">
-  Loading...
+<script>
+  function redirect(){
+    if($("#gamename").val() !="")
+      window.location = "game/" + $("#gamename").val();
+  }
+</script>
+<div class="row">
+  <div class="col">
+    <div class="form-group">
+      <label for="name"> Name</label>
+      <input type="text" name="name" id="gamename"/>
+      <button id="joingame" onclick="redirect()"> Join Game</button>
+    </div>
+  </div>
 </div>
-
-
-
