@@ -7,53 +7,53 @@ defmodule Memory.Game do
   if it comes from the database, an external API or others.
   """
 
-	def new do
-		%{
-			char_array: shuffle_arr(),
-			active_tile: [],
-			clicks: 0,
-			tiles: tiles_arr(),
-			processing: false,
-			score: 0,
-      matched: false,
-		}
-	end
-	def tiles_arr do
-		for n <- 0..15, do: %{idx: n, text: "Try Me!", clicked: false, disabled: false, bgcolor: "btn btn-dark"}
-	end
+  def new do
+	%{
+		char_array: shuffle_arr(),
+		active_tile: [],
+		clicks: 0,
+		tiles: tiles_arr(),
+		processing: false,
+		score: 0,
+                matched: false,
+	}
+  end
+
+  def tiles_arr do
+	for n <- 0..15, do: %{idx: n, text: "Try Me!", clicked: false, disabled: false, bgcolor: "btn btn-dark"}
+  end
 
 
+  def shuffle_arr do
+	arr = ["A","A","B","B","C","C","D","D","E","E","F","F","G","G","H","H"]
+	arr = Enum.shuffle arr
+  end
 
-	def shuffle_arr do
-		arr = ["A","A","B","B","C","C","D","D","E","E","F","F","G","G","H","H"]
-		arr = Enum.shuffle arr
-	end
-	def validate(game, idx) do
-		letter = Enum.at(game.char_array, idx)
-		tileState = Enum.at(game.tiles, idx)
+  def validate(game, idx) do
+    letter = Enum.at(game.char_array, idx)
+    tileState = Enum.at(game.tiles, idx)
     IO.puts letter
     IO.inspect(tileState)
-		cond do
-			length(game.active_tile) < 2 and !tileState.clicked and !tileState.disabled and !game.processing ->
-
-			tileState = %{tileState | text: letter, clicked: true}
-      clicks = game.clicks + 1
-      tiles = game.tiles
-      tiles = List.replace_at(tiles, idx, tileState)
-      active_tile = game.active_tile
-      active_tile= [idx | active_tile]
-			#game = %{game | clicks: (game.clicks + 1), tiles: List.replace_at(game.tiles, idx, tileState), active_tile: [game.active_tile | idx]}
-      game = Map.put(game, :clicks, clicks)
-      IO.puts(game.clicks)
-      game = Map.put(game, :tiles, tiles)
-      IO.puts "updating game done"
-      game = Map.put(game, :active_tile, active_tile)
-      game = Map.put(game, :matched, false)
-      #check_open_tile(game, length(game.active_tile))
-      game.active_tile.length == 2 -> check_open_tile(game, length(game.active_length))
-      true -> game
-		end
-	end
+    cond do
+    length(game.active_tile) < 2 and !tileState.clicked and !tileState.disabled and !game.processing ->
+       tileState = %{tileState | text: letter, clicked: true}
+       clicks = game.clicks + 1
+       tiles = game.tiles
+       tiles = List.replace_at(tiles, idx, tileState)
+       active_tile = game.active_tile
+       active_tile= [idx | active_tile]
+       #game = %{game | clicks: (game.clicks + 1), tiles: List.replace_at(game.tiles, idx, tileState), active_tile: [game.active_tile | idx]}
+       game = Map.put(game, :clicks, clicks)
+       IO.puts(game.clicks)
+       game = Map.put(game, :tiles, tiles)
+       IO.puts "updating game done"
+       game = Map.put(game, :active_tile, active_tile)
+       game = Map.put(game, :matched, false)
+       #check_open_tile(game, length(game.active_tile))
+       game.active_tile.length == 2 -> check_open_tile(game, length(game.active_length))
+       true -> game
+    end
+  end
 
   def check_open_tile(game, len) when len == 2 do
     tile1 = Enum.at(game.tiles, Enum.at(game.active_tile,0))
@@ -83,7 +83,8 @@ defmodule Memory.Game do
       game = %{game | score: game.score - 2, active_tile: [], tiles: tiles_arr, processing: false, matched: false}
     end
   end
+
   def check_open_tile(game, len) do
-  game
+ 	 game
   end
 end
