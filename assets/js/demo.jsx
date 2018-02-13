@@ -105,8 +105,6 @@ render() {
   }
 
 
-
-
 function Tile(params) {
 	let root = params.root;
   let styleProps = {
