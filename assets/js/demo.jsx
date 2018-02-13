@@ -52,7 +52,6 @@ class Demo extends React.Component {
  }
 
 youWin() {
-
        for(var i = 0; i < 16; i++)
                 if(!this.state.tiles[i].disabled) {break;}
         if(i == 16)
@@ -102,8 +101,8 @@ render() {
   			</div>
   			</div>
    </div>);
-		}
-		}
+	}	
+  }
 
 
 
@@ -116,8 +115,6 @@ function Tile(params) {
   if(root.state.tiles.length>0)
 	return (
 		<Button type="button" className = {root.state.tiles[params.idx].bgcolor}  onClick = { () => root.displayLetter(params.idx) } style={styleProps} >{root.state.tiles[params.idx].text}</Button>
-
-
 	);
   else {
     return (<p> Loading</p>);
